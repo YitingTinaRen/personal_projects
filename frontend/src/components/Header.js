@@ -14,9 +14,7 @@ function Header({ title }) {
     const allMenuItems = [
         { path: '/', label: '首頁' },
         { path: '/about', label: '關於我' },
-        { path: '/contact', label: '聯絡我' },
-        { path: '/services', label: '服務項目' },
-        { path: '/booking', label: '預約服務' }
+        { path: '/contact', label: '聯絡我' }
     ];
 
     // 過濾掉當前頁面的選項

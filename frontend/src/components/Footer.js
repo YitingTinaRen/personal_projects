@@ -4,7 +4,7 @@ import '../App.css';
 function Footer() {
     return (
         <footer className="footer">
-            <p>© 2025 預約服務. All rights reserved.</p>
+            <p>© 2025. All rights reserved.</p>
         </footer>
     );
 }

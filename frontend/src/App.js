@@ -4,6 +4,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Appointment from './pages/Appointment/AppointmentIndex';
+import Schedule from './pages/Appointment/Schedule';
 import './App.css';
 import { useState } from 'react';
 
@@ -56,11 +58,11 @@ function ProjectsSection({ title, projects, onCardClick }) {
 
 // Placeholder project data
 const ongoingProjects = [
-  { id: 1, title: '進行中專案 A', image: '/project-a-bg.jpg', description: '這是進行中專案 A 的詳細描述。', githubUrl: '#', projectUrl: '#' },
+  { id: 1, title: '預約系統', image: '/appointment/apointment.jpg', description: '正在進行中', githubUrl: '#', projectUrl: '/appointment/' },
 ];
 
 const historicalProjects = [
-  { id: 3, title: '歷史專案 C', image: '/project-c-bg.jpg', description: '這是歷史專案 C 的詳細描述。', githubUrl: '#', projectUrl: '#' },
+  { id: 2, title: '台北一日遊', image: '/TPE_day_trip/TPE-day-trip-project.jpeg', description: '這是我做的第一個網站。', githubUrl: '#', projectUrl: 'https://starfruit8106.synology.me:3001/' },
   { id: 4, title: '歷史專案 D', image: '/project-d-bg.jpg', description: '這是歷史專案 D 的詳細描述。', githubUrl: '#', projectUrl: '#' },
   { id: 5, title: '歷史專案 E', image: '/project-e-bg.jpg', description: '這是歷史專案 E 的詳細描述。', githubUrl: '#', projectUrl: '#' },
   { id: 6, title: '歷史專案 F', image: '/project-e-bg.jpg', description: '這是歷史專案 F 的詳細描述。', githubUrl: '#', projectUrl: '#' }
@@ -97,6 +99,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/appointment" element={<Appointment />} />
+        <Route path="/appointment/schedule" element={<Schedule />} />
       </Routes>
     </Router>
   );
