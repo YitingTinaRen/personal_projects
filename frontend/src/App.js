@@ -1,13 +1,15 @@
 import React from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Modal from './components/modal';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Appointment from './pages/Appointment/AppointmentIndex';
 import Schedule from './pages/Appointment/Schedule';
+import Booking from './pages/Appointment/Book';
 import './App.css';
-import { useState } from 'react';
 
 // 專案卡片元件草稿
 function ProjectCard({ project, onCardClick }) {
@@ -21,24 +23,21 @@ function ProjectCard({ project, onCardClick }) {
 
 // 專案彈出視窗元件草稿
 function ProjectModal({ project, onClose }) {
-  if (!project) return null; // 如果沒有專案資料，不顯示視窗
-
+  if (!project) return null;
   return (
-    <div className="modal-overlay" onClick={onClose}> {/* 點擊背景關閉視窗 */}
-      <div className="modal-content" onClick={e => e.stopPropagation()}> {/* 阻止點擊視窗內容時關閉視窗 */}
-        <h3>{project.title}</h3>
-        <p>{project.description}</p>
-        <div className="modal-buttons">
-          {project.githubUrl && (
-            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="modal-button github">GitHub</a>
-          )}
-          {project.projectUrl && (
-            <a href={project.projectUrl} target="_blank" rel="noopener noreferrer" className="modal-button demo">專案連結</a>
-          )}
-        </div>
-        <button className="modal-close-button" onClick={onClose}>X</button>
+    <Modal open={project} onClose={onClose}>
+      <h3>{project.title}</h3>
+      <p>{project.description}</p>
+      <div className="modal-buttons">
+        {project.githubUrl && (
+          <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="modal-button github">GitHub</a>
+        )}
+        {project.projectUrl && (
+          <a href={project.projectUrl} target="_blank" rel="noopener noreferrer" className="modal-button demo">專案連結</a>
+        )}
       </div>
-    </div>
+
+    </Modal>
   );
 }
 
@@ -101,6 +100,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/appointment/schedule" element={<Schedule />} />
+        <Route path="/appointment/booking" element={<Booking />} />
       </Routes>
     </Router>
   );
