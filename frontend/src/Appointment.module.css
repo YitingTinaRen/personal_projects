@@ -271,6 +271,7 @@ select:focus {
 .formGrid input[type='number'],
 .formGrid select {
     margin-left: 0.5rem;
+    margin-right: 0.5rem;
     padding: 0.4rem 0.8rem;
     border-radius: 6px;
     border: 1px solid #e0e0e0;
@@ -334,7 +335,6 @@ select:focus {
     color: #fff;
     border: none;
     border-radius: 8px;
-    padding: 0.4rem 1.2rem;
     font-size: 1rem;
     cursor: pointer;
     margin-top: 0.5rem;

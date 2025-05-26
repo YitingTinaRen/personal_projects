@@ -32,9 +32,9 @@ function Schedule() {
     const [minPeople, setMinPeople] = useState('1');
     const [durationHour, setDurationHour] = useState('00');
     const [durationMinute, setDurationMinute] = useState('00');
-    const [fixedSlots, setFixedSlots] = useState([{ week: '一', hour: '09', minute: '00', period: 'AM' }]);
+    const [fixedSlots, setFixedSlots] = useState([{ week: '一', hour: '09', minute: '00' }]);
     const [freeSlots, setFreeSlots] = useState([
-        { week: '一', morningStart: '06', morningEnd: '07', afternoonStart: '13', afternoonEnd: '14', eveningStart: '19', eveningEnd: '20' }
+        { week: '一', start: '08', end: '23' }
     ]);
 
     // 模擬API
@@ -85,20 +85,30 @@ function Schedule() {
         setFixedSlots(slots => slots.filter((_, i) => i !== idx));
     };
     const addFixedSlot = () => {
-        setFixedSlots(slots => [...slots, { week: '一', hour: '09', minute: '00', period: 'AM' }]);
+        setFixedSlots(slots => [...slots, { week: '一', hour: '09', minute: '00' }]);
     };
     const updateFreeSlot = (idx, key, value) => {
-        setFreeSlots(slots => slots.map((s, i) => i === idx ? { ...s, [key]: value } : s));
+        setFreeSlots(slots => slots.map((s, i) => {
+            if (i !== idx) return s;
+            let newSlot = { ...s, [key]: value };
+            if (key === 'start' && Number(newSlot.end) < Number(value)) {
+                newSlot.end = value; // 自動同步
+            }
+            if (key === 'end' && Number(value) < Number(newSlot.start)) {
+                newSlot.start = value; // 自動同步
+            }
+            return newSlot;
+        }));
     };
     const removeFreeSlot = idx => {
         setFreeSlots(slots => slots.filter((_, i) => i !== idx));
     };
     const addFreeSlot = () => {
-        setFreeSlots(slots => [...slots, { week: '一', morningStart: '06', morningEnd: '07', afternoonStart: '13', afternoonEnd: '14', eveningStart: '19', eveningEnd: '20' }]);
+        setFreeSlots(slots => [...slots, { week: '一', start: '08', end: '23' }]);
     };
 
     // 新增行程分類彈窗
-    function AddCategoryModal({ open, onClose }) {
+    function AddScheduleModal({ open, onClose }) {
         if (!open) return null;
         return (
             <Modal open={open} onClose={onClose}>
@@ -136,29 +146,48 @@ function Schedule() {
                     <label>
                         可預約時段
                         {categoryType === 'fixed' ? (
-                            fixedSlots.map((slot, idx) => (
-                                <div key={idx} className={styles.slotRow}>
-                                    <select value={slot.week} onChange={e => updateFixedSlot(idx, 'week', e.target.value)}>
-                                        {['一', '二', '三', '四', '五', '六', '日'].map(w => <option key={w} value={w}>{w}</option>)}
-                                    </select>
-                                    <select value={slot.hour} onChange={e => updateFixedSlot(idx, 'hour', e.target.value)}>
-                                        {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
-                                    </select> 時
-                                    <select value={slot.minute} onChange={e => updateFixedSlot(idx, 'minute', e.target.value)}>
-                                        {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(m => <option key={m} value={m}>{m}</option>)}
-                                    </select> 分
-                                    <button type="button" onClick={() => removeFixedSlot(idx)}>-</button>
-                                    <div><button type="button" className={styles.slotAddBtn} onClick={addFixedSlot}>新增時段</button></div>
-                                </div>
-                            ))
+                            <table className={styles.slotTable}>
+                                <thead>
+                                    <tr>
+                                        <th>星期</th>
+                                        <th>時間</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {fixedSlots.map((slot, idx) => (
+                                        <tr key={idx}>
+                                            <td>
+                                                <select value={slot.week} onChange={e => updateFixedSlot(idx, 'week', e.target.value)}>
+                                                    {['一', '二', '三', '四', '五', '六', '日'].map(w => <option key={w} value={w}>{w}</option>)}
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select value={slot.hour} onChange={e => updateFixedSlot(idx, 'hour', e.target.value)}>
+                                                    {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
+                                                </select> 時
+                                                <select value={slot.minute} onChange={e => updateFixedSlot(idx, 'minute', e.target.value)}>
+                                                    {Array.from({ length: 12 }, (_, i) => String(5 * i).padStart(2, '0')).map(m => <option key={m} value={m}>{m}</option>)}
+                                                </select> 分
+                                            </td>
+                                            <td>
+                                                <button type="button" className={styles.slotRemoveBtn} onClick={() => removeFixedSlot(idx)}>-</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    <tr>
+                                        <td colSpan={5} style={{ textAlign: 'center' }}>
+                                            <button type="button" className={styles.slotAddBtn} onClick={addFixedSlot}>新增時段</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         ) : (
                             <table className={styles.slotTable}>
                                 <thead>
                                     <tr>
                                         <th>星期</th>
-                                        <th>早上</th>
-                                        <th>下午</th>
-                                        <th>晚上</th>
+                                        <th>時段</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -171,31 +200,13 @@ function Schedule() {
                                                 </select>
                                             </td>
                                             <td>
-                                                <select value={slot.morningStart} onChange={e => updateFreeSlot(idx, 'morningStart', e.target.value)}>
-                                                    {Array.from({ length: 7 }, (_, i) => String(i + 6).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
-                                                </select>
+                                                <select value={slot.start} onChange={e => updateFreeSlot(idx, 'start', e.target.value)}>
+                                                    {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
+                                                </select>時
                                                 -
-                                                <select value={slot.morningEnd} onChange={e => updateFreeSlot(idx, 'morningEnd', e.target.value)}>
-                                                    {Array.from({ length: 7 }, (_, i) => String(i + 6).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select value={slot.afternoonStart} onChange={e => updateFreeSlot(idx, 'afternoonStart', e.target.value)}>
-                                                    {Array.from({ length: 6 }, (_, i) => String(i + 13).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
-                                                </select>
-                                                -
-                                                <select value={slot.afternoonEnd} onChange={e => updateFreeSlot(idx, 'afternoonEnd', e.target.value)}>
-                                                    {Array.from({ length: 6 }, (_, i) => String(i + 13).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select value={slot.eveningStart} onChange={e => updateFreeSlot(idx, 'eveningStart', e.target.value)}>
-                                                    {Array.from({ length: 6 }, (_, i) => String(i + 19).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
-                                                </select>
-                                                -
-                                                <select value={slot.eveningEnd} onChange={e => updateFreeSlot(idx, 'eveningEnd', e.target.value)}>
-                                                    {Array.from({ length: 6 }, (_, i) => String(i + 19).padStart(2, '0')).map(h => <option key={h} value={h}>{h}</option>)}
-                                                </select>
+                                                <select value={slot.end} onChange={e => updateFreeSlot(idx, 'end', e.target.value)}>
+                                                    {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).filter(h => Number(h) >= Number(slot.start)).map(h => <option key={h} value={h}>{h}</option>)}
+                                                </select>時
                                             </td>
                                             <td>
                                                 <button type="button" className={styles.slotRemoveBtn} onClick={() => removeFreeSlot(idx)}>-</button>
@@ -310,7 +321,7 @@ function Schedule() {
                     )}
                 </div>
                 {/* 新增行程分類彈窗 */}
-                <AddCategoryModal open={showModal} onClose={() => setShowModal(false)} />
+                <AddScheduleModal open={showModal} onClose={() => setShowModal(false)} />
             </main>
             <Footer />
         </div>
