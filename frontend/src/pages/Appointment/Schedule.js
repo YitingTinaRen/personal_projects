@@ -4,6 +4,25 @@ import Footer from '../../components/Appointment/Footer';
 import Modal from '../../components/Appointment/modal';
 import styles from '../../Appointment.module.css';
 
+// 模擬API
+async function fetchScheduleData(year, month) {
+    // 模擬延遲
+    await new Promise(r => setTimeout(r, 500));
+    // 假資料
+    const mockSchedules = ['行程A', '行程B', '行程C'];
+    const mockScheduleData = {};
+    for (let d = 1; d <= new Date(year, month, 0).getDate(); d++) {
+        mockScheduleData[d] = {};
+        for (const cat of mockSchedules) {
+            // 每天每分類有 3 個時段，隨機 0~2 個被預約
+            const slots = ['09:00', '13:00', '16:00'];
+            const reserved = slots.filter(() => Math.random() < 0.15);
+            mockScheduleData[d][cat] = { slots, reserved };
+        }
+    }
+    return { schedules: mockSchedules, scheduleData: mockScheduleData };
+}
+
 function Schedule() {
     // 年月日初始化
     const currentYear = new Date().getFullYear();
@@ -37,32 +56,13 @@ function Schedule() {
         { week: '一', start: '08', end: '23' }
     ]);
 
-    // 模擬API
-    async function fetchScheduleData(year, month) {
-        // 模擬延遲
-        await new Promise(r => setTimeout(r, 500));
-        // 假資料
-        const mockCategories = ['行程A', '行程B', '行程C'];
-        const mockCalendarData = {};
-        for (let d = 1; d <= new Date(year, month, 0).getDate(); d++) {
-            mockCalendarData[d] = {};
-            for (const cat of mockCategories) {
-                // 每天每分類有 3 個時段，隨機 0~2 個被預約
-                const slots = ['09:00', '13:00', '16:00'];
-                const reserved = slots.filter(() => Math.random() < 0.15);
-                mockCalendarData[d][cat] = { slots, reserved };
-            }
-        }
-        return { categories: mockCategories, calendarData: mockCalendarData };
-    }
-
     // 取得資料
     useEffect(() => {
         setLoading(true);
         fetchScheduleData(year, month).then(res => {
-            setCategories(res.categories);
-            setSelectedCategory(res.categories[0] || '');
-            setCalendarData(res.calendarData);
+            setCategories(res.schedules);
+            setSelectedCategory(res.schedules[0] || '');
+            setCalendarData(res.scheduleData);
             setLoading(false);
         });
     }, [year, month]);
