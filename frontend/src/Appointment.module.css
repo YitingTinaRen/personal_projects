@@ -18,7 +18,7 @@
 }
 
 .dateSelection,
-.categorySelection {
+.scheduleSelection {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -41,7 +41,7 @@ select:focus {
     background: #fff;
 }
 
-.addCategoryButton {
+.addScheduleButton {
     background: #4f8cff;
     color: #fff;
     border: none;
@@ -57,7 +57,7 @@ select:focus {
     transition: background 0.2s;
 }
 
-.addCategoryButton:hover {
+.addScheduleButton:hover {
     background: #2563eb;
 }
 
@@ -130,7 +130,7 @@ select:focus {
     border: 1.5px solid #4f8cff;
 }
 
-.addCategoryBtn {
+.addScheduleBtn {
     background: #4f8cff;
     color: #fff;
     border: none;
@@ -142,7 +142,7 @@ select:focus {
     transition: background 0.2s;
 }
 
-.addCategoryBtn:hover {
+.addScheduleBtn:hover {
     background: #2563eb;
 }
 
@@ -154,6 +154,8 @@ select:focus {
 
     .modalContent {
         padding: 1.5rem;
+        max-height: 85vh;
+        overflow-y: auto;
     }
 }
 
@@ -267,11 +269,16 @@ select:focus {
     margin-bottom: 0.2rem;
 }
 
+.formGrid label>b {
+    min-width: 90px;
+    margin-right: 0.5rem;
+    font-weight: 600;
+}
+
 .formGrid input[type='text'],
 .formGrid input[type='number'],
 .formGrid select {
     margin-left: 0.5rem;
-    margin-right: 0.5rem;
     padding: 0.4rem 0.8rem;
     border-radius: 6px;
     border: 1px solid #e0e0e0;
@@ -346,7 +353,7 @@ select:focus {
     background: #2563eb;
 }
 
-.addCategoryBtn {
+.addScheduleBtn {
     background: #4f8cff;
     color: #fff;
     border: none;
@@ -358,7 +365,7 @@ select:focus {
     transition: background 0.2s;
 }
 
-.addCategoryBtn:hover {
+.addScheduleBtn:hover {
     background: #2563eb;
 }
 
@@ -375,16 +382,15 @@ select:focus {
         font-size: 1rem;
     }
 
-    .slotRow {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.3rem;
+    .formGrid label>b {
+        margin-bottom: 0.2rem;
+        margin-right: 0;
     }
 
     .formGrid input[type='text'],
     .formGrid input[type='number'],
     .formGrid select {
-        min-width: 60px;
+        min-width: 85px;
         width: 100%;
         margin-left: 0;
     }
@@ -451,4 +457,19 @@ select:focus {
         min-width: 40px;
         font-size: 0.95rem;
     }
+}
+
+.formGrid .labelBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+}
+
+.inputRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
 }
