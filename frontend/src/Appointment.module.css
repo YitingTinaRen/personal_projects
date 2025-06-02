@@ -473,3 +473,293 @@ select:focus {
     flex-wrap: wrap;
     margin-top: 0.5rem;
 }
+
+/* 週視圖樣式 */
+.weekView {
+    width: 100%;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.weekHeader {
+    padding: 1rem;
+    background: #f7f8fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.backButton {
+    background: #4f8cff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+}
+
+.backButton:hover {
+    background: #2563eb;
+}
+
+.weekDates {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+}
+
+.weekDate {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.weekDay {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.weekDateNum {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.timeSlots {
+    display: flex;
+    min-height: 400px;
+    border-top: 1px solid #e0e0e0;
+    padding: 1rem;
+}
+
+.dayColumn {
+    flex: 1;
+    border-right: 1px solid #e0e0e0;
+    padding: 0.5rem;
+}
+
+.dayColumn:last-child {
+    border-right: none;
+}
+
+.timeSlot {
+    padding: 0.5rem;
+    margin: 0.3rem 0;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.timeSlot.reserved {
+    background: #fff0f0;
+    color: #ff3b30;
+    cursor: not-allowed;
+}
+
+.timeSlot.available {
+    background: #f0f7ff;
+    color: #4f8cff;
+}
+
+.timeSlot.available:hover {
+    background: #e0eaff;
+    transform: translateY(-1px);
+}
+
+/* 月視圖更新樣式 */
+.reservedTime {
+    font-size: 0.75rem;
+    color: #ff3b30;
+    background: #fff0f0;
+    border-radius: 4px;
+    padding: 0.2rem 0.4rem;
+    margin-top: 0.2rem;
+}
+
+.availableTime {
+    font-size: 0.75rem;
+    color: #4f8cff;
+    background: #f0f7ff;
+    border-radius: 4px;
+    padding: 0.2rem 0.4rem;
+    margin-top: 0.2rem;
+}
+
+.partialTime {
+    font-size: 0.75rem;
+    color: #ff9500;
+    background: #fff8e6;
+    border-radius: 4px;
+    padding: 0.2rem 0.4rem;
+    margin-top: 0.2rem;
+}
+
+@media (max-width: 600px) {
+    .weekDates {
+        flex-wrap: wrap;
+    }
+
+    .weekDate {
+        flex: 0 0 25%;
+        margin-bottom: 0.5rem;
+    }
+
+    .timeSlots {
+        flex-wrap: wrap;
+    }
+
+    .dayColumn {
+        flex: 0 0 50%;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .dayColumn:nth-child(2n) {
+        border-right: none;
+    }
+}
+
+/* 日視圖樣式 */
+.dayView {
+    width: 100%;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.dayHeader {
+    padding: 1rem;
+    background: #f7f8fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.dayTitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* 選中日期樣式 */
+.weekDate.selectedDate {
+    background: #e0eaff;
+    border-radius: 8px;
+}
+
+.weekDate.selectedDate .weekDay,
+.weekDate.selectedDate .weekDateNum {
+    color: #4f8cff;
+    font-weight: 600;
+}
+
+.dayColumn.selectedColumn {
+    background: #f0f7ff;
+}
+
+/* 時間槽樣式更新 */
+.timeSlots {
+    display: flex;
+    min-height: 400px;
+    border-top: 1px solid #e0e0e0;
+    padding: 1rem;
+}
+
+.dayView .timeSlots {
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dayView .timeSlot {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+    .dayView .timeSlot {
+        max-width: 100%;
+    }
+
+    .weekDates {
+        flex-wrap: wrap;
+    }
+
+    .weekDate {
+        flex: 0 0 25%;
+        margin-bottom: 0.5rem;
+    }
+
+    .timeSlots {
+        flex-wrap: wrap;
+    }
+
+    .dayColumn {
+        flex: 0 0 50%;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .dayColumn:nth-child(2n) {
+        border-right: none;
+    }
+}
+
+/* 手機版樣式 */
+@media (max-width: 600px) {
+    .weekView {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .weekHeader {
+        padding: 0.8rem;
+    }
+
+    .weekDates {
+        display: none;
+        /* 隱藏週視圖的日期選擇器 */
+    }
+
+    .timeSlots {
+        flex-direction: column;
+        padding: 0.5rem;
+    }
+
+    .dayColumn {
+        display: none;
+        /* 隱藏所有日期列 */
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    /* 只顯示選中日期的列 */
+    .dayColumn.selectedColumn {
+        display: block;
+        flex: none;
+        width: 100%;
+        border-bottom: none;
+    }
+
+    .timeSlot {
+        width: 100%;
+        max-width: none;
+        margin: 0.3rem 0;
+    }
+
+    /* 添加日期標題 */
+    .dayColumn.selectedColumn::before {
+        content: attr(data-date);
+        display: block;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+}

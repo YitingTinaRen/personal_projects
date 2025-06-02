@@ -16,7 +16,7 @@ async function fetchScheduleData(year, month) {
         for (const cat of mockSchedules) {
             // 每天每分類有 3 個時段，隨機 0~2 個被預約
             const slots = ['09:00', '13:00', '16:00'];
-            const reserved = slots.filter(() => Math.random() < 0.15);
+            const reserved = slots.filter(() => Math.random() < 0.45);
             mockScheduleData[d][cat] = { slots, reserved };
         }
     }
@@ -29,6 +29,9 @@ function Schedule() {
     const [year, setYear] = useState(currentYear);
     const [month, setMonth] = useState(new Date().getMonth() + 1);
     const [day, setDay] = useState(new Date().getDate());
+    // 視圖模式
+    const [viewMode, setViewMode] = useState('month'); // 'month' 或 'week' 或 'day'
+    const [selectedDate, setSelectedDate] = useState(new Date());
     // 年份范围
     const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -42,6 +45,7 @@ function Schedule() {
     const [loading, setLoading] = useState(true);
     // 彈窗狀態
     const [showModal, setShowModal] = useState(false);
+    const [showDeleteScheduleModal, setShowDeleteScheduleModal] = useState(false);
     const [newSchedule, setNewSchedule] = useState('');
 
     // 新增行程分類表單狀態
@@ -70,7 +74,7 @@ function Schedule() {
         });
     }, [year, month]);
 
-    // 處理新增分類（僅前端，實際應呼叫API）
+    // 處理新增行程（僅前端，實際應呼叫API）
     const handleAddSchedule = () => {
         if (newSchedule && !schedules.includes(newSchedule)) {
             setSchedules([...schedules, newSchedule]);
@@ -78,6 +82,12 @@ function Schedule() {
         }
         setNewSchedule('');
         setShowModal(false);
+    };
+    // 處理刪除行程 (僅前端，實際應呼叫API)
+    const handleDeleteSchedule = () => {
+        setSchedules(schedules.filter(s => s !== selectedSchedule));
+        setSelectedSchedule('');
+        setShowDeleteScheduleModal(false);
     };
 
     // slot 操作
@@ -136,6 +146,62 @@ function Schedule() {
     const today = new Date();
     const isToday = (d) => d && year === today.getFullYear() && month === today.getMonth() + 1 && d === today.getDate();
 
+    // 生成週視圖資料
+    function getWeekData(date) {
+        const startOfWeek = new Date(date);
+        if (date.getDay() === 0) {
+            startOfWeek.setDate(date.getDate() - 6); // 設定為週一
+        } else {
+            startOfWeek.setDate(date.getDate() - date.getDay() + 1); // 設定為週一
+        }
+
+        const weekData = [];
+        for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(startOfWeek);
+            currentDate.setDate(startOfWeek.getDate() + i);
+            weekData.push({
+                date: currentDate,
+                day: currentDate.getDate(),
+                month: currentDate.getMonth() + 1,
+                year: currentDate.getFullYear()
+            });
+        }
+        return weekData;
+    }
+
+    // 處理日期點擊
+    const handleDateClick = (d) => {
+        if (!d) return;
+        const newDate = new Date(year, month - 1, d);
+        setSelectedDate(newDate);
+        setViewMode('week'); // 統一設置為週視圖，由 CSS 控制顯示
+    };
+
+    // 返回月視圖
+    const handleBackToMonth = () => {
+        setViewMode('month');
+    };
+
+    // 生成時間槽
+    const generateTimeSlots = (date) => {
+        const day = date.date.getDate();
+        if (!scheduleData[day] || !scheduleData[day][selectedSchedule]) {
+            return [];
+        }
+        const { slots, reserved } = scheduleData[day][selectedSchedule];
+        return slots.map(time => ({
+            time,
+            isReserved: reserved.includes(time)
+        }));
+    };
+
+    // 判斷日期是否被選中
+    const isSelectedDate = (date) => {
+        return date.getDate() === selectedDate.getDate() &&
+            date.getMonth() === selectedDate.getMonth() &&
+            date.getFullYear() === selectedDate.getFullYear();
+    };
+
     return (
         <div className={styles.app}>
             <Header title="來預約" />
@@ -147,9 +213,11 @@ function Schedule() {
                     <select className={styles.monthSelect} value={month} onChange={e => setMonth(Number(e.target.value))}>
                         {months.map(m => <option key={m} value={m}>{String(m).padStart(2, '0')}</option>)}
                     </select> 月
-                    <select className={styles.daySelect} value={day} onChange={e => setDay(Number(e.target.value))}>
-                        {days.map(d => <option key={d} value={d}>{String(d).padStart(2, '0')}</option>)}
-                    </select> 日
+                    {viewMode === 'month' && (
+                        <select className={styles.daySelect} value={day} onChange={e => setDay(Number(e.target.value))}>
+                            {days.map(d => <option key={d} value={d}>{String(d).padStart(2, '0')}</option>)}
+                        </select>
+                    )}
                 </div>
                 <div className={styles.scheduleSelection}>
                     行程：
@@ -157,11 +225,12 @@ function Schedule() {
                         {schedules.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                     <button className={styles.addScheduleButton} onClick={() => setShowModal(true)}>+</button>
+                    <button className={styles.addScheduleButton} onClick={() => setShowDeleteScheduleModal(true)}>-</button>
                 </div>
                 <div className={styles.calendarArea}>
                     {loading ? (
                         <div style={{ textAlign: 'center', width: '100%', padding: '2rem', color: '#aaa' }}>載入中...</div>
-                    ) : (
+                    ) : viewMode === 'month' ? (
                         <div className={styles.calendarContainer}>
                             <table className={styles.calendarTable}>
                                 <thead>
@@ -179,17 +248,24 @@ function Schedule() {
                                     {calendarMatrix.map((week, i) => (
                                         <tr key={i}>
                                             {week.map((d, j) => (
-                                                <td key={j} className={isToday(d) ? styles.today : d ? styles.active : styles.empty}>
+                                                <td
+                                                    key={j}
+                                                    className={isToday(d) ? styles.today : d ? styles.active : styles.empty}
+                                                    onClick={() => handleDateClick(d)}
+                                                >
                                                     <div style={{ position: 'relative' }}>
                                                         {d || ''}
-                                                        {d && scheduleData[d] && scheduleData[d][selectedSchedule] && scheduleData[d][selectedSchedule].reserved.length > 0 && (
+                                                        {d && scheduleData[d] && scheduleData[d][selectedSchedule] && (
                                                             <div className={styles.reservedList}>
-                                                                {scheduleData[d][selectedSchedule].reserved
-                                                                    .slice()
-                                                                    .sort((a, b) => a.localeCompare(b))
-                                                                    .map(time => (
-                                                                        <div key={time} className={styles.reservedTime}>{time}</div>
-                                                                    ))}
+                                                                {scheduleData[d][selectedSchedule].slots.length > 0 && (
+                                                                    scheduleData[d][selectedSchedule].reserved.length === scheduleData[d][selectedSchedule].slots.length ? (
+                                                                        <div className={styles.reservedTime}>滿</div>
+                                                                    ) : scheduleData[d][selectedSchedule].reserved.length > 0 ? (
+                                                                        <div className={styles.partialTime}>尚可預約</div>
+                                                                    ) : (
+                                                                        <div className={styles.availableTime}>可預約</div>
+                                                                    )
+                                                                )}
                                                             </div>
                                                         )}
                                                     </div>
@@ -199,6 +275,41 @@ function Schedule() {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    ) : (
+                        <div className={styles.weekView}>
+                            <div className={styles.weekHeader}>
+                                <button onClick={handleBackToMonth} className={styles.backButton}>返回月視圖</button>
+                                <div className={styles.weekDates}>
+                                    {getWeekData(selectedDate).map((date, index) => (
+                                        <div
+                                            key={index}
+                                            className={`${styles.weekDate} ${isSelectedDate(date.date) ? styles.selectedDate : ''}`}
+                                        >
+                                            <div className={styles.weekDay}>{['一', '二', '三', '四', '五', '六', '日'][index]}</div>
+                                            <div className={styles.weekDateNum}>{date.day}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className={styles.timeSlots}>
+                                {getWeekData(selectedDate).map((date, index) => (
+                                    <div
+                                        key={index}
+                                        className={`${styles.dayColumn} ${isSelectedDate(date.date) ? styles.selectedColumn : ''}`}
+                                        data-date={`${date.year}年${date.month}月${date.day}日`}
+                                    >
+                                        {generateTimeSlots(date).map((slot, slotIndex) => (
+                                            <div
+                                                key={slotIndex}
+                                                className={`${styles.timeSlot} ${slot.isReserved ? styles.reserved : styles.available}`}
+                                            >
+                                                {slot.time}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
@@ -235,6 +346,12 @@ function Schedule() {
                     handleAddSchedule={handleAddSchedule}
                     currentYear={currentYear}
                     styles={styles}
+                />
+                <DeleteScheduleModal
+                    open={showDeleteScheduleModal}
+                    onClose={() => setShowDeleteScheduleModal(false)}
+                    scheduleName={selectedSchedule}
+                    handleDeleteSchedule={handleDeleteSchedule}
                 />
             </main>
             <Footer />
@@ -396,5 +513,26 @@ function AddScheduleModal({
         </Modal>
     );
 }
+
+function DeleteScheduleModal({
+    open, onClose,
+    scheduleName,
+    handleDeleteSchedule
+}) {
+    if (!open) return null;
+    return (
+        <Modal open={open} onClose={onClose}>
+            <form className={styles.formGrid} onSubmit={e => { e.preventDefault(); handleDeleteSchedule(); }}>
+                <label>
+                    <b>即將刪除行程:</b>
+                    {scheduleName}
+                </label>
+                <button type="submit" className={styles.addScheduleBtn}>刪除</button>
+                <button type="button" className={styles.addScheduleBtn} onClick={onClose}>取消</button>
+            </form>
+        </Modal>
+    );
+}
+
 
 export default Schedule; 
